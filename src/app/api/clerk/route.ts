@@ -1,12 +1,18 @@
 import { db } from "@/lib/db";
+import { Role } from "@prisma/client";
 
 // Define types for the incoming webhook payload
 interface EmailAddress {
   emailAddress: string;
+  id: string;
+  verification: {
+    status: string;
+  };
 }
 
 interface ExternalAccount {
   provider: string;
+  providerId: string;
   username: string | null;
   imageUrl: string | null;
   emailAddress: string | null;
@@ -14,88 +20,167 @@ interface ExternalAccount {
 
 interface WebhookData {
   id: string;
-  first_name?: string;
-  last_name?: string;
+  username: string;
+  first_name?: string | null;
+  last_name?: string | null;
   image_url?: string | null;
   email_addresses: EmailAddress[];
   external_accounts: ExternalAccount[];
+  primary_email_address_id: string;
 }
+
+// Helper function to generate a username from email
+const generateUsername = (email: string): string => {
+  return email
+    .split("@")[0]
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+};
 
 // Helper function for upserting user data into the database
 const upsertUser = async (
-  id: number,
+  id: string,
   email: string,
   name: string,
   imageUrl: string | null,
+  providerId: string | null,
+  provider: "github" | "linkedin" | "email",
 ) => {
-  await db.user.upsert({
-    where: { id },
-    update: { email, name, imageUrl },
-    create: { id, email, name, imageUrl },
-  });
+  const username = generateUsername(email);
+
+  const userData = {
+    email,
+    name,
+    username,
+    role: Role.DEVELOPER, // Default role, can be changed later
+    ...(provider === "github" ? { githubId: providerId } : {}),
+    ...(provider === "linkedin" ? { linkedinId: providerId } : {}),
+  };
+
+  try {
+    await db.user.upsert({
+      where: { email },
+      update: userData,
+      create: {
+        ...userData,
+        profile: {
+          create: {
+            bio: "",
+            skills: [],
+            experience: "",
+          },
+        },
+      },
+    });
+  } catch (error) {
+    // Handle unique constraint violation for username
+    if (error.code === "P2002") {
+      // If username already exists, append a random number
+      userData.username = `${username}${Math.floor(Math.random() * 1000)}`;
+      await db.user.upsert({
+        where: { email },
+        update: userData,
+        create: {
+          ...userData,
+          profile: {
+            create: {
+              bio: "",
+              skills: [],
+              experience: "",
+            },
+          },
+        },
+      });
+    } else {
+      throw error;
+    }
+  }
 };
 
-export const POST = async (req: Request): Promise<Response> => {
+export async function POST(req: Request): Promise<Response> {
   try {
     const { data }: { data: WebhookData } = await req.json();
 
-    // Validate the necessary fields from the webhook payload
+    // Validate the webhook payload
     if (
-      !data ||
+      !data?.id ||
       !data.email_addresses ||
-      !data.email_addresses[0]?.emailAddress
+      data.email_addresses.length === 0
     ) {
       return new Response("Invalid webhook payload", { status: 400 });
     }
 
-    // Extract common fields
-    const email = data.email_addresses[0].emailAddress;
-    const firstName = data.first_name || "Unknown";
+    // Get primary email
+    const primaryEmail =
+      data.email_addresses.find(
+        (email) => email.id === data.primary_email_address_id,
+      )?.emailAddress || data.email_addresses[0].emailAddress;
+
+    // Extract user information
+    const firstName = data.first_name || "";
     const lastName = data.last_name || "";
     const imageUrl = data.image_url || null;
-    const id = data.id || crypto.randomUUID(); // Fallback to a random ID if `id` is missing
-    const name = `${firstName} ${lastName}`.trim();
+    const name = `${firstName} ${lastName}`.trim() || "Anonymous User";
 
-    // Check for GitHub account
+    // Find the external account (GitHub or LinkedIn)
     const githubAccount = data.external_accounts.find(
       (account) => account.provider === "github",
     );
 
-    if (githubAccount) {
-      const githubUsername = githubAccount.username || "Unknown";
-      const githubProfileImageUrl = githubAccount.imageUrl || imageUrl;
-      const githubEmail = githubAccount.emailAddress || email;
-
-      // Upsert user with GitHub data
-      await upsertUser(id, githubEmail, name, githubProfileImageUrl);
-
-      return new Response("GitHub webhook processed successfully", {
-        status: 200,
-      });
-    }
-
-    // Check for LinkedIn account
     const linkedinAccount = data.external_accounts.find(
       (account) => account.provider === "linkedin",
     );
 
-    if (linkedinAccount) {
-      const linkedinUsername = linkedinAccount.username || "Unknown";
-      const linkedinProfileImageUrl = linkedinAccount.imageUrl || imageUrl;
-      const linkedinEmail = linkedinAccount.emailAddress || email;
+    if (githubAccount) {
+      const userEmail = githubAccount.emailAddress || primaryEmail;
+      const userImageUrl = githubAccount.imageUrl || imageUrl;
 
-      // Upsert user with LinkedIn data
-      await upsertUser(id, linkedinEmail, name, linkedinProfileImageUrl);
+      await upsertUser(
+        data.id,
+        userEmail,
+        name,
+        userImageUrl,
+        githubAccount.providerId,
+        "github",
+      );
 
-      return new Response("LinkedIn webhook processed successfully", {
+      return new Response("GitHub user processed successfully", {
         status: 200,
       });
     }
 
-    // If no supported provider is found, return success with no action
-    return new Response("Webhook processed successfully", { status: 200 });
+    if (linkedinAccount) {
+      const userEmail = linkedinAccount.emailAddress || primaryEmail;
+      const userImageUrl = linkedinAccount.imageUrl || imageUrl;
+
+      await upsertUser(
+        data.id,
+        userEmail,
+        name,
+        userImageUrl,
+        linkedinAccount.providerId,
+        "linkedin",
+      );
+
+      return new Response("LinkedIn user processed successfully", {
+        status: 200,
+      });
+    }
+
+    // Handle email-only signup
+    await upsertUser(data.id, primaryEmail, name, imageUrl, null, "email");
+
+    return new Response("User processed successfully", { status: 200 });
   } catch (error) {
     console.error("Error processing webhook:", error);
-    return new Response("Internal Server Error", { status: 500 });
+
+    if (error instanceof SyntaxError) {
+      return new Response("Invalid JSON payload", { status: 400 });
+    }
+
+    return new Response(
+      `Internal Server Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      { status: 500 },
+    );
   }
-};
+}

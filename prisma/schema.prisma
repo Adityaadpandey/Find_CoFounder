@@ -14,7 +14,7 @@ datasource db {
 }
 
 model User {
-  id           Int           @id @default(autoincrement())
+  id           String        @id @default(cuid())
   username     String        @unique
   email        String        @unique
   name         String
@@ -22,38 +22,47 @@ model User {
   linkedinId   String?       @unique
   role         Role
   phone        String?
-  profile      Profile? // No need to specify @relation here
-  createdIdeas Idea[]        @relation("UserCreatedIdeas") // Adjusted relation name
-  appliedIdeas Application[] @relation("UserAppliedIdeas") // Adjusted relation name
+  profile      Profile? // Remove fields/references here as they're defined in Profile
+  createdIdeas Idea[] // Relation name is defined in the Idea model
+  applications Application[] // Relation name is defined in the Application model
+
+  @@map("users") // Good practice to explicitly define table names
 }
 
 model Profile {
-  id         Int      @id @default(autoincrement())
+  id         String   @id @default(cuid())
   bio        String
   skills     String[]
   experience String
-  userId     Int      @unique // Added @unique to enforce one-to-one relation
-  user       User     @relation(fields: [userId], references: [id]) // Define fields here
+  userId     String   @unique // Foreign key to User
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
 }
 
 model Idea {
-  id           Int           @id @default(autoincrement())
+  id           String        @id @default(cuid())
   title        String
   description  String
   equity       Float
   skills       String[]
-  userId       Int
-  user         User          @relation("UserCreatedIdeas", fields: [userId], references: [id]) // Adjusted relation name
-  applications Application[] @relation("IdeaApplications")
+  userId       String // Foreign key to User
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications Application[] // Relation name is defined in the Application model
+
+  @@map("ideas")
 }
 
 model Application {
-  id     Int               @id @default(autoincrement())
-  ideaId Int
-  userId Int
+  id     String            @id @default(cuid())
+  ideaId String // Foreign key to Idea
+  userId String // Foreign key to User
   status ApplicationStatus @default(PENDING)
-  user   User              @relation("UserAppliedIdeas", fields: [userId], references: [id]) // Adjusted relation name
-  idea   Idea              @relation("IdeaApplications", fields: [ideaId], references: [id]) // Adjusted relation name
+  user   User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  idea   Idea              @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, ideaId]) // Prevent duplicate applications
+  @@map("applications")
 }
 
 enum Role {
