@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  username     String        @unique
+  email        String        @unique
+  githubId     String        @unique
+  linkedinId   String        @unique
+  role         Role
+  phone        String?
+  profile      Profile? // No need to specify @relation here
+  createdIdeas Idea[]        @relation("UserCreatedIdeas") // Adjusted relation name
+  appliedIdeas Application[] @relation("UserAppliedIdeas") // Adjusted relation name
+}
+
+model Profile {
+  id         Int      @id @default(autoincrement())
+  bio        String
+  skills     String[]
+  experience String
+  userId     Int      @unique // Added @unique to enforce one-to-one relation
+  user       User     @relation(fields: [userId], references: [id]) // Define fields here
+}
+
+model Idea {
+  id           Int           @id @default(autoincrement())
+  title        String
+  description  String
+  equity       Float
+  skills       String[]
+  userId       Int
+  user         User          @relation("UserCreatedIdeas", fields: [userId], references: [id]) // Adjusted relation name
+  applications Application[] @relation("IdeaApplications")
+}
+
+model Application {
+  id     Int               @id @default(autoincrement())
+  ideaId Int
+  userId Int
+  status ApplicationStatus @default(PENDING)
+  user   User              @relation("UserAppliedIdeas", fields: [userId], references: [id]) // Adjusted relation name
+  idea   Idea              @relation("IdeaApplications", fields: [ideaId], references: [id]) // Adjusted relation name
+}
+
+enum Role {
+  FOUNDER
+  DEVELOPER
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
