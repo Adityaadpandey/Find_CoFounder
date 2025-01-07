@@ -17,8 +17,9 @@ model User {
   id           Int           @id @default(autoincrement())
   username     String        @unique
   email        String        @unique
-  githubId     String        @unique
-  linkedinId   String        @unique
+  name         String
+  githubId     String?       @unique
+  linkedinId   String?       @unique
   role         Role
   phone        String?
   profile      Profile? // No need to specify @relation here
