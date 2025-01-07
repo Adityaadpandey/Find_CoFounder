@@ -23,7 +23,7 @@ interface WebhookData {
 
 // Helper function for upserting user data into the database
 const upsertUser = async (
-  id: string,
+  id: number,
   email: string,
   name: string,
   imageUrl: string | null,
