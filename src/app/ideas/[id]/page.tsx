@@ -1,50 +1,51 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useParams } from 'next/navigation'
-import { Layout } from '@/components/layout'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Textarea } from '@/components/ui/textarea'
+import { useState } from "react";
+import { useParams } from "next/navigation";
+import { Layout } from "@/components/layout";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 
 // This is mock data. In a real application, this would come from an API or database.
 const mockIdeas = {
-  '1': {
-    id: '1',
-    title: 'AI-Powered Personal Finance App',
+  "1": {
+    id: "1",
+    title: "AI-Powered Personal Finance App",
     description:
-      'We're developing an AI-driven app that helps users manage their finances, predict expenses, and achieve financial goals. The app will use machine learning algorithms to analyze spending patterns, provide personalized advice, and automate savings and investments.',
-    skills: ['React Native', 'Machine Learning', 'Node.js'],
-    equity: '10-15%',
-    founderName: 'Jane Doe',
-    founderBio: 'Serial entrepreneur with a background in fintech and data science.',
+      "We're developing an AI-driven app that helps users manage their finances, predict expenses, and achieve financial goals. The app will use machine learning algorithms to analyze spending patterns, provide personalized advice, and automate savings and investments.",
+    skills: ["React Native", "Machine Learning", "Node.js"],
+    equity: "10-15%",
+    founderName: "Jane Doe",
+    founderBio:
+      "Serial entrepreneur with a background in fintech and data science.",
   },
-  '2': {
-    id: '2',
-    title: 'Sustainable Fashion Marketplace',
+  "2": {
+    id: "2",
+    title: "Sustainable Fashion Marketplace",
     description:
-      'Creating a platform that connects eco-conscious consumers with sustainable and ethical fashion brands. Our marketplace will feature a curated selection of environmentally friendly and socially responsible clothing and accessories.',
-    skills: ['React', 'Node.js', 'UI/UX Design'],
-    equity: '8-12%',
-    founderName: 'Alex Green',
-    founderBio: 'Fashion industry veteran with a passion for sustainability.',
+      "Creating a platform that connects eco-conscious consumers with sustainable and ethical fashion brands. Our marketplace will feature a curated selection of environmentally friendly and socially responsible clothing and accessories.",
+    skills: ["React", "Node.js", "UI/UX Design"],
+    equity: "8-12%",
+    founderName: "Alex Green",
+    founderBio: "Fashion industry veteran with a passion for sustainability.",
   },
-}
+};
 
 export default function IdeaDetailsPage() {
-  const params = useParams()
-  const id = typeof params.id === 'string' ? params.id : '1'
-  const [application, setApplication] = useState('')
+  const params = useParams();
+  const id = typeof params.id === "string" ? params.id : "1";
+  const [application, setApplication] = useState("");
 
   // In a real application, you would fetch the idea details based on the id
-  const idea = mockIdeas[id as keyof typeof mockIdeas] || mockIdeas['1'] // Fallback to first idea if id not found
+  const idea = mockIdeas[id as keyof typeof mockIdeas] || mockIdeas["1"]; // Fallback to first idea if id not found
 
   const handleApply = () => {
     // Handle the application submission here
-    console.log('Application submitted:', application)
+    console.log("Application submitted:", application);
     // You might want to send this to an API, show a success message, etc.
-  }
+  };
 
   return (
     <Layout>
@@ -113,6 +114,5 @@ export default function IdeaDetailsPage() {
         </div>
       </div>
     </Layout>
-  )
+  );
 }
-
