@@ -46,10 +46,11 @@ model Idea {
   description  String
   equity       Float
   skills       String[]
-  userId       String // Foreign key to User
+  userId       String
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  applications Application[] // Relation name is defined in the Application model
+  applications Application[]
 
+  @@index([userId])
   @@map("ideas")
 }
 
@@ -62,6 +63,8 @@ model Application {
   idea   Idea              @relation(fields: [ideaId], references: [id], onDelete: Cascade)
 
   @@unique([userId, ideaId]) // Prevent duplicate applications
+  @@index([userId])
+  @@index([ideaId])
   @@map("applications")
 }
 

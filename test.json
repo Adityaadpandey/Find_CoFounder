@@ -1,0 +1,96 @@
+{
+  "data": {
+    "backup_code_enabled": false,
+    "banned": false,
+    "create_organization_enabled": true,
+    "created_at": 1736292913557,
+    "delete_self_enabled": true,
+    "email_addresses": [
+      {
+        "created_at": 1736292908361,
+        "email_address": "adityapandeyadp@gmail.com",
+        "id": "idn_2rK1N58vcA7oXK4opMhgq2RS8qs",
+        "linked_to": [
+          { "id": "idn_2rK1N4s2yCg1w5Q0N6U1yb40lUu", "type": "oauth_github" }
+        ],
+        "matches_sso_connection": false,
+        "object": "email_address",
+        "reserved": false,
+        "updated_at": 1736292913604,
+        "verification": {
+          "attempts": null,
+          "expire_at": null,
+          "status": "verified",
+          "strategy": "from_oauth_github"
+        }
+      }
+    ],
+    "enterprise_accounts": [],
+    "external_accounts": [
+      {
+        "approved_scopes": "read:user user:email",
+        "avatar_url": "https://avatars.githubusercontent.com/u/53257475?v=4",
+        "created_at": 1736292908342,
+        "email_address": "adityapandeyadp@gmail.com",
+        "first_name": "Aditya",
+        "id": "eac_2rK1N0YokWfFaMklbOi58qCL5Ab",
+        "identification_id": "idn_2rK1N4s2yCg1w5Q0N6U1yb40lUu",
+        "image_url": "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2F2YXRhcnMuZ2l0aHVidXNlcmNvbnRlbnQuY29tL3UvNTMyNTc0NzU/dj00IiwicyI6IkJXaklWa3JIQ0U5WGdjT2NQMzRWVk16SFdMZFI5U0g3VkY4VjlmOGpSNG8ifQ",
+        "label": null,
+        "last_name": "Dutt Pandey",
+        "object": "external_account",
+        "provider": "oauth_github",
+        "provider_user_id": "53257475",
+        "public_metadata": {},
+        "updated_at": 1736292908342,
+        "username": "adityaadpandey",
+        "verification": {
+          "attempts": null,
+          "expire_at": 1736293504649,
+          "status": "verified",
+          "strategy": "oauth_github"
+        }
+      }
+    ],
+    "external_id": null,
+    "first_name": "Aditya",
+    "has_image": true,
+    "id": "user_2rK1Ni5QiAaxJUoAMgzu9erEKwJ",
+    "image_url": "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ2l0aHViL2ltZ18ycksxTmNFRmJUa1JsQWNsVTVjcEVHaUk2WFkifQ",
+    "last_active_at": 1736292913555,
+    "last_name": "Dutt Pandey",
+    "last_sign_in_at": null,
+    "legal_accepted_at": null,
+    "locked": false,
+    "lockout_expires_in_seconds": null,
+    "mfa_disabled_at": null,
+    "mfa_enabled_at": null,
+    "object": "user",
+    "passkeys": [],
+    "password_enabled": false,
+    "phone_numbers": [],
+    "primary_email_address_id": "idn_2rK1N58vcA7oXK4opMhgq2RS8qs",
+    "primary_phone_number_id": null,
+    "primary_web3_wallet_id": null,
+    "private_metadata": {},
+    "profile_image_url": "https://images.clerk.dev/oauth_github/img_2rK1NcEFbTkRlAclU5cpEGiI6XY",
+    "public_metadata": {},
+    "saml_accounts": [],
+    "totp_enabled": false,
+    "two_factor_enabled": false,
+    "unsafe_metadata": {},
+    "updated_at": 1736292913628,
+    "username": "adityaadpandey",
+    "verification_attempts_remaining": 100,
+    "web3_wallets": []
+  },
+  "event_attributes": {
+    "http_request": {
+      "client_ip": "146.196.39.110",
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    }
+  },
+  "object": "event",
+  "timestamp": 1736292913687,
+  "type": "user.created"
+}
